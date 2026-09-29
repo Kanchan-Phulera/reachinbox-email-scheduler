@@ -1,0 +1,39 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = ""
+  moduleFormat        = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Email {
+  id          String      @id @default(uuid())
+  to          String
+  subject     String
+  body        String
+  scheduledAt DateTime
+  status      EmailStatus @default(SCHEDULED)
+  sentAt      DateTime?
+  messageId   String?
+  previewUrl  String?
+  error       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+enum EmailStatus {
+  SCHEDULED
+  PROCESSING
+  SENT
+  FAILED
+}
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
