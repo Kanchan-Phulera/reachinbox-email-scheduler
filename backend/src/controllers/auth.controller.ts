@@ -5,6 +5,10 @@ import { prisma } from "../config/db";
 
 const JWT_SECRET = process.env.JWT_SECRET || "reachinbox-secret-key";
 
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing");
+}
+
 export const register = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
