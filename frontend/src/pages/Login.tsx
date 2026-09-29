@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import api from "../api/axios";
 import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -23,13 +24,10 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("isLoggedIn", "true");
@@ -39,7 +37,7 @@ const Login = () => {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setErrorMessage(
-          error.response?.data?.message || "Invalid email or password."
+          error.response?.data?.message || "Invalid email or password.",
         );
       } else {
         setErrorMessage("Something went wrong. Please try again.");
@@ -52,16 +50,13 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-[#0B0714] flex items-center justify-center px-6">
       <div className="w-full max-w-md">
-
         {/* Logo and heading */}
         <div className="text-center mb-8">
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-2xl font-bold text-white shadow-lg shadow-purple-500/20">
             R
           </div>
 
-          <h1 className="mt-5 text-3xl font-bold text-white">
-            Welcome back
-          </h1>
+          <h1 className="mt-5 text-3xl font-bold text-white">Welcome back</h1>
 
           <p className="mt-2 text-zinc-400">
             Sign in to your ReachInbox scheduler
