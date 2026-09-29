@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Worker } from "bullmq";
 import nodemailer from "nodemailer";
 import { prisma } from "../config/db";
@@ -7,6 +8,12 @@ const transporter = nodemailer.createTransport({
   host: process.env.ETHEREAL_HOST,
   port: Number(process.env.ETHEREAL_PORT) || 587,
   secure: false,
+
+  // Prevent SMTP connection from hanging indefinitely
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
+
   auth: {
     user: process.env.ETHEREAL_USER,
     pass: process.env.ETHEREAL_PASSWORD,
@@ -48,18 +55,22 @@ export const emailWorker = new Worker(
 
     try {
       console.log("Checking Ethereal SMTP configuration...");
+
       console.log(
         "ETHEREAL_HOST:",
         process.env.ETHEREAL_HOST ? "Present" : "MISSING"
       );
+
       console.log(
         "ETHEREAL_PORT:",
         process.env.ETHEREAL_PORT ? "Present" : "MISSING"
       );
+
       console.log(
         "ETHEREAL_USER:",
         process.env.ETHEREAL_USER ? "Present" : "MISSING"
       );
+
       console.log(
         "ETHEREAL_PASSWORD:",
         process.env.ETHEREAL_PASSWORD ? "Present" : "MISSING"
@@ -105,11 +116,12 @@ export const emailWorker = new Worker(
       console.error("=================================");
       console.error("EMAIL SEND FAILED");
       console.error("Email ID:", emailId);
-      console.error("Error:", error);
 
       if (error instanceof Error) {
         console.error("Error message:", error.message);
         console.error("Error stack:", error.stack);
+      } else {
+        console.error("Unknown error:", error);
       }
 
       await prisma.email.update({
@@ -128,6 +140,7 @@ export const emailWorker = new Worker(
       console.error("Database updated: FAILED");
       console.error("=================================");
 
+      // Let BullMQ know that the job failed
       throw error;
     }
   },
@@ -142,5 +155,5 @@ emailWorker.on("completed", (job) => {
 
 emailWorker.on("failed", (job, error) => {
   console.error("BullMQ job failed:", job?.id);
-  console.error("BullMQ error:", error);
+  console.error("BullMQ error:", error.message);
 });
