@@ -5,6 +5,7 @@ import "./workers/email.worker";
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
+  
   try {
     await prisma.$connect();
 
